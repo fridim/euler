@@ -23,13 +23,12 @@
   (g-f-p '(2 3 5) 3 7))
 
 (define (get-first-primes2 n)
-  (define (g-f-p found acc)
+  (let g-f-p ([found 1] [acc 3])
     (if (= found n)
       '()
       (if (is-prime? acc)
         (cons acc (g-f-p (add1 found) (+ 2 acc)))
-        (g-f-p found (+ 2 acc)))))
-  (g-f-p 1 3)) 
+        (g-f-p found (+ 2 acc))))))
 
 (time (car (get-first-primes 10001)))
 (time (last (get-first-primes2 10001)))
