@@ -16,13 +16,12 @@
 
 ;; return list of prime-factors (with exposant)
 ;; ex: (prime-factors 8) -> '(2 2 2)
-(define (prime-factors n)
-  (define (prime-factors-r n i)
+(define (prime-factors num)
+  (let prime-factors-r ([n num] [i 2])
     (cond ((= n 1) '())
           ((= (modulo n i) 0)
            (cons i (prime-factors-r (quotient n i) i)))
-          (else (prime-factors-r n (+ i 1)))))
-  (prime-factors-r n 2))
+          (else (prime-factors-r n (+ i 1))))))
 
 
 ;; thanks to ijp on #racket IRC channel
@@ -31,7 +30,7 @@
       (for/fold ([current (car ls)]
                  [current-len (length (car ls))])
         ([next (cdr ls)])
-        (let ((next-len (length next)))
+        (let ([next-len (length next)])
           (if (< current-len next-len)
               (values next next-len)
               (values current current-len))))))
@@ -57,8 +56,8 @@
   (define (flat-all ls)
     (apply * (map (curry apply *) ls)))
 
-  (let ((pm-list (map prime-factors
-                      (range 1 (+ n 1)))))
+  (let ([pm-list (map prime-factors
+                      (range 1 (+ n 1)))])
     (flat-all
      (for/list ([i (in-range 1 (+ n 1))])
        (longest-member (filter (negate empty?)
