@@ -7,13 +7,12 @@
 
 ;; find the max product of n consecutive digits in sn
 (define (euler8 n)
-  (define (e-rec l len)
+  (let ([l (map (curryr - 48)
+                (map char->integer (string->list sn)))])
+    (let e-rec ([l l] [len (length l)])
     (if (= len (- n 1))
       '()
       (cons (apply * (for/list ([i n]) (list-ref l i)))
-            (e-rec (cdr l) (- len 1)))))
-  (let ((l (map (curryr - 48)
-                (map char->integer (string->list sn)))))
-    (e-rec l (length l))))
+            (e-rec (cdr l) (- len 1)))))))
 
 (apply max (euler8 5))
