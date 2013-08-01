@@ -26,23 +26,24 @@
   (vector-ref (vector-ref v y) x))
 
 ;; bottom, right, bottom-right bottom-left
-(define (bottom-right x y)
-  (apply * (for/list ([i 4]) (get (+ x i) (+ y i)))))
+(define (bottom-right x y i)
+  (get (+ x i) (+ y i)))
 
-(define (bottom-left x y)
-  (apply * (for/list ([i 4]) (get (- x i) (+ y i)))))
+(define (bottom-left x y i)
+  (get (- x i) (+ y i)))
 
-(define (right x y)
-  (apply * (for/list ([i 4]) (get (+ x i) y))))
+(define (right x y i)
+  (get (+ x i) y))
 
-(define (bottom x y)
-  (apply * (for/list ([i 4]) (get x (+ i y)))))
+(define (bottom x y i)
+  (get x (+ i y)))
 
-(time (max (apply max (for*/list ([x 16] [y 16])
-                                 (bottom-right x y)))
-           (apply max (for*/list ([x (in-range 3 20)] [y 16])
-                                 (bottom-left x y)))
-           (apply max (for*/list ([x 16] [y 20])
-                                 (right x y)))
-           (apply max (for*/list ([x 20] [y 16])
-                                 (bottom x y)))))
+(define (max-range xmin xmax ymin ymax direction)
+  (apply max (for*/list ([x (in-range xmin xmax)]
+                         [y (in-range ymin ymax)])
+                        (apply * (for/list ([i 4]) (direction x y i))))))
+
+(time (max (max-range 0 16 0 16 bottom-right)
+           (max-range 3 20 0 16 bottom-left)
+           (max-range 0 16 0 20 right)
+           (max-range 0 20 0 16 bottom)))
