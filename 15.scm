@@ -35,3 +35,7 @@
             (+ 1 (apply + v))])))
 
 (time (euler15 20)) ;; < 2ms  \o/
+
+;; this is also :
+(require math)
+(+ 1 (binomial 40 20))
