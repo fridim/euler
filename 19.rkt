@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/base
 
 #|
 You are given the following information, but you may prefer to do some
