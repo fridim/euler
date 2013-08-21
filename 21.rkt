@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/base
 
 #| Let d(n) be defined as the sum of proper divisors of n (numbers less than n
 which divide evenly into n).  If d(a) = b and d(b) = a, where a ≠ b, then a and
@@ -32,3 +32,5 @@ Evaluate the sum of all the amicable numbers under 10000. |#
           (if (amicable? i d-i)
             (+ i (if (< d-i limit) d-i 0) (sum-amicables (+ 1 i)))
             (sum-amicables (+ 1 i))))))))
+
+(time (euler21 10000))
