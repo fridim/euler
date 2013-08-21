@@ -27,10 +27,8 @@ Evaluate the sum of all the amicable numbers under 10000. |#
   (let sum-amicables ([i 1])
     (if (= i limit) 0
       (let ([d-i (d i)])
-        (if (>= i d-i) ;; already in the sum or egal to i
+        (if (or (>= i d-i) (not (amicable? i d-i)))
           (sum-amicables (+ 1 i))
-          (if (amicable? i d-i)
-            (+ i (if (< d-i limit) d-i 0) (sum-amicables (+ 1 i)))
-            (sum-amicables (+ 1 i))))))))
+            (+ i (if (< d-i limit) d-i 0) (sum-amicables (+ 1 i))))))))
 
 (time (euler21 10000))
