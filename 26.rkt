@@ -21,8 +21,7 @@ its decimal fraction part.
 
 #lang racket/base
 
-(require rackunit
-         racket/set)
+(require rackunit)
 
 (define (reccuring-cycle n)
   (let helper ([r 1] [done (list)])
