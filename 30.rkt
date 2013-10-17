@@ -33,24 +33,20 @@ of their digits.
                  [d (in-range 10)]
                  [e (in-range 10)]
                  [f (in-range 10)]
-                 #:when (and (= (+ (expt a 5)
-                                   (expt b 5)
-                                   (expt c 5)
-                                   (expt d 5)
-                                   (expt e 5)
-                                   (expt f 5))
-                                (+ (* 100000 a)
-                                   (* 10000 b)
-                                   (* 1000 c)
-                                   (* 100 d)
-                                   (* 10 e)
-                                   f))))
-                (+ sum (+ (* 100000 a)
-                          (* 10000 b)
-                          (* 1000 c)
-                          (* 100 d)
-                          (* 10 e)
-                          f)))
+                 [oneway (in-value (+ (* 100000 a)
+                                      (* 10000 b)
+                                      (* 1000 c)
+                                      (* 100 d)
+                                      (* 10 e)
+                                      f))]
+                 [otherway (in-value (+ (expt a 5)
+                                        (expt b 5)
+                                        (expt c 5)
+                                        (expt d 5)
+                                        (expt e 5)
+                                        (expt f 5)))]
+                 #:when (= oneway otherway))
+                (+ sum oneway))
      ; 1 is not a sum
      1))
 
