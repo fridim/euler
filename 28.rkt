@@ -16,6 +16,7 @@ What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed
 in the same way?
 |#
 
+(require rackunit)
 
 (define (euler28 limit)
   (+ 1 (let helper ([n 0] [sum 0] [prev 1])
@@ -23,3 +24,7 @@ in the same way?
            (if (> diagn (* limit limit))
              sum
              (helper (+ n 1) (+ sum diagn) diagn))))))
+
+(check-equal? (euler28 5) 101)
+
+(time (euler28 1001)) ; 0ms
