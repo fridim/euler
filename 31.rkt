@@ -11,16 +11,15 @@
 
 #lang racket/base
 
-(define coins (list 1 2 5 10 20 50 100 200))
-
 ;; Brute force works fine here
 (define (euler31)
-  (let helper ((r 200) (rcoins coins))
+  (let helper ((r 200)
+               (coins (list 1 2 5 10 20 50 100 200)))
     (cond ((< r 0) 0)
           ((= r 0) 1)
-          ((null? rcoins) 0)
+          ((null? coins) 0)
           (else
-            (+ (helper (- r (car rcoins)) rcoins)
-               (helper r (cdr rcoins)))))))
+            (+ (helper (- r (car coins)) coins)
+               (helper r (cdr coins)))))))
 
 (time (euler31)) ; 200 ms
