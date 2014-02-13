@@ -1,4 +1,4 @@
-#lang racket/base
+#lang typed/racket
 
 #| It was proposed by Christian Goldbach that every odd composite number can be
 written as the sum of a prime and twice a square.
@@ -18,6 +18,7 @@ and twice a square? |#
 
 (require (only-in math next-prime prime?))
 
+(: next-composite (Integer -> Integer))
 (define (next-composite n)
   (let ((next (+ 2 n)))
     (if (prime? next)
@@ -25,12 +26,11 @@ and twice a square? |#
       next)))
 
 (define (euler46)
-  (let loop ([n 35] [p 2])
-    (cond ((> p n)
-           n)
+  (let: loop : Integer
+        ([n : Integer 35] [p : Integer  2])
+    (cond ((> p n) n)
           ((integer? (sqrt (/ (- n p) 2)))
            (loop (next-composite n) 2))
-          (else
-            (loop n (next-prime p))))))
+          (else (loop n (next-prime p))))))
 
-(time (euler46)) ; 800 ms
+(time (euler46)) ; 200 ms
