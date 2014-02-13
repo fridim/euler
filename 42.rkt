@@ -50,6 +50,7 @@ words? |#
 (define (euler42)
   (length
     (filter triangle-word?
-            (string-split (string-replace (file->string "words.txt") "\"" "") ","))))
+            (string-split (string-replace (file->string "words.txt") "\"" "")
+                          ","))))
 
 (time (euler42)) ; 10 ms
