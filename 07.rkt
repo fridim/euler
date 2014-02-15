@@ -2,33 +2,18 @@
 ;; that the 6th prime is 13.
 ;; What is the 10 001st prime number?
 
-#lang racket
+#lang racket/base
 
-(define (is-prime? n)
-  (define (is-prime2? n limit i)
-    (if (> i limit)
-      #t
-      (if (= (modulo n i) 0)
-        #f
-        (is-prime2? n limit (+ i 1)))))
-  (is-prime2? n (quotient n 2) 2))
+(define (prime? n)
+  (and (not (= (modulo n 2) 0))
+       (for/and ([i (in-range 3 (add1 (sqrt n)) 2)])
+                (not (= 0 (modulo n i))))))
 
-(define (get-first-primes n)
-  (define (g-f-p prime-list prime-list-len acc)
-    (if (= prime-list-len n)
-      prime-list
-      (if (is-prime? acc)
-        (g-f-p (cons acc prime-list) (add1 prime-list-len) (+ 2 acc))
-        (g-f-p prime-list prime-list-len (+ 2 acc)))))
-  (g-f-p '(2 3 5) 3 7))
+(define (prime-at n)
+  (let loop ([found 2] [cur 3])
+    (if (prime? cur)
+      (if (= found n) cur
+        (loop (add1 found) (+ cur 2)))
+      (loop found (+ cur 2)))))
 
-(define (get-first-primes2 n)
-  (let g-f-p ([found 1] [acc 3])
-    (if (= found n)
-      '()
-      (if (is-prime? acc)
-        (cons acc (g-f-p (add1 found) (+ 2 acc)))
-        (g-f-p found (+ 2 acc))))))
-
-(time (car (get-first-primes 10001)))
-(time (last (get-first-primes2 10001)))
+(time (prime-at 10001)) ; 103 ms
