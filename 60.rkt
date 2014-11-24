@@ -46,18 +46,11 @@ concatenate to produce another prime. |#
 (struct point (value connected-to) #:transparent)
 
 (define (graph-get g p)
-  (for/first ((i (in-list g))
-              #:when (= p (point-value i)))
-    i))
+  (hash-ref g p #f))
 
 (define (graph-del g p)
-  (filter-not (lambda(i) (= p (point-value i)))
-              g))
+  (hash-remove g p))
 
-(check-equal? (graph-del (list (point 3 (list 1))
-                               (point 7 (list 2 3)))
-                         7)
-              (list (point 3 '(1))))
 
 (define (graph-add g p)
   (let* ((old-p (graph-get g (point-value p)))
@@ -66,7 +59,7 @@ concatenate to produce another prime. |#
                            (remove-duplicates (append (point-connected-to old-p)
                                                       (point-connected-to p))))
                     p)))
-    (cons new-p (graph-del g (point-value p)))))
+    (hash-set g (point-value p) new-p)))
 
 ; will complete connected-to points
 (define (graph-complete g p)
@@ -80,25 +73,8 @@ concatenate to produce another prime. |#
                 (graph-add res
                            (point cur (list v))))))))
 
-(module+ test
-  (check-equal?
-   (graph-complete (list (point 3 '()))
-                   (point 3 (list 1 2)))
-   (list (point 2 (list 3))
-         (point 1 (list 3))
-         (point 3 (list 1 2))))
-
-  (check-equal? (graph-complete (list (point 2 (list 3))
-                                      (point 1 (list 3))
-                                      (point 3 (list 1 2)))
-                                (point 7 (list 3)))
-                (list (point 3 (list 1 2 7))
-                      (point 7 (list 3))
-                      (point 2 (list 3))
-                      (point 1 (list 3)))))
-
 (define (mk-graph)
-  (let loop ((pool primes) (res '()))
+  (let loop ((pool primes) (res (hash)))
     (if (null? pool)
         res
         (let* ((i (car pool))
@@ -114,21 +90,17 @@ concatenate to produce another prime. |#
 ;    - v connections have at least 5 connections with other vertices connected to v
 (define (graph-filter g)
   ; we are looking only at point with at least 5 connections
-  (let loop ((cur-g (cdr g)) (cur (car g)) (res '()))
-    (if (empty? cur-g)
-        res
-        (let* ((cur-ct (point-connected-to cur))
-               (cur-v (point-value cur))
-               (at-least-5
-                (filter (lambda(p)
-                          (>= (length
-                               (filter (lambda(pp) (member pp cur-ct))
-                                       (point-connected-to (graph-get g p))))
-                              5))
-                        cur-ct)))
-          (if (>= (length at-least-5) 5)
-              (loop (cdr cur-g) (car cur-g) (cons (cons cur-v cur-ct) res))
-              (loop (cdr cur-g) (car cur-g) res))))))
+  (for*/list ((cur (in-hash-values g))
+              (cur-ct (in-value (point-connected-to cur)))
+              (cur-v (in-value (point-value cur)))
+              (at-least-5 (in-value (filter (lambda(p)
+                                              (>= (length
+                                                   (filter (lambda(pp) (member pp cur-ct))
+                                                           (point-connected-to (graph-get g p))))
+                                                  5))
+                                            cur-ct)))
+              #:when (>= (length at-least-5) 5))
+    (cons cur-v cur-ct)))
 
 (define (all-connected? g ls)
   (for*/and ((a (in-list ls))
