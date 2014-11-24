@@ -14,6 +14,7 @@ concatenate to produce another prime. |#
 (require (only-in math prime? next-primes))
 
 (require racket/list
+         racket/set
          rackunit)
 
 (define (concat a b)
@@ -40,7 +41,7 @@ concatenate to produce another prime. |#
   (check-true (linked? 109 3)))
 
 (define (pairs a ls)
-  (for/list ([b (in-list ls)] #:when (linked? a b))
+  (for/set ([b (in-list ls)] #:when (linked? a b))
     b))
 
 (struct point (value connected-to) #:transparent)
@@ -56,8 +57,8 @@ concatenate to produce another prime. |#
   (let* ((old-p (graph-get g (point-value p)))
          (new-p (if old-p
                     (point (point-value p)
-                           (remove-duplicates (append (point-connected-to old-p)
-                                                      (point-connected-to p))))
+                           (set-union (point-connected-to old-p)
+                                      (point-connected-to p)))
                     p)))
     (hash-set g (point-value p) new-p)))
 
@@ -65,70 +66,46 @@ concatenate to produce another prime. |#
 (define (graph-complete g p)
   (define cp (point-connected-to p))
   (define v (point-value p))
-  (let loop ((ls cp) (res (graph-add g p)))
-    (if (null? ls)
-        res
-        (let ((cur (car ls)))
-          (loop (cdr ls)
-                (graph-add res
-                           (point cur (list v))))))))
+  (for/fold ((res (graph-add g p)))
+            ((cur (in-set cp)))
+    (graph-add res (point cur (set v)))))
 
 (define (mk-graph)
+  ; todo: this would be more readable with for/fold
   (let loop ((pool primes) (res (hash)))
     (if (null? pool)
         res
         (let* ((i (car pool))
                (pi (pairs i (cdr pool))))
-          (if (>= (length pi) 5)
+          (if (>= (set-count pi) 5)
               (loop (cdr pool) (graph-complete res (point i pi)))
               (loop (cdr pool) res))))))
 
-
-;; We need to find 5 vertices  connected to each other
-; - only look for vertices with at least 5 connections (mk-graph)
-; - at-least-5: filter vertices -> for each vertex v, keep v if:
-;    - v connections have at least 5 connections with other vertices connected to v
-(define (graph-filter g)
-  ; we are looking only at point with at least 5 connections
-  (for*/list ((cur (in-hash-values g))
-              (cur-ct (in-value (point-connected-to cur)))
-              (cur-v (in-value (point-value cur)))
-              (at-least-5 (in-value (filter (lambda(p)
-                                              (>= (length
-                                                   (filter (lambda(pp) (member pp cur-ct))
-                                                           (point-connected-to (graph-get g p))))
-                                                  5))
-                                            cur-ct)))
-              #:when (>= (length at-least-5) 5))
-    (cons cur-v cur-ct)))
-
-(define (all-connected? g ls)
-  (for*/and ((a (in-list ls))
-             (b (in-list ls))
-             #:when (not (= a b))
-             (pa (in-value (graph-get g a))))
-    (if (member b (point-connected-to pa)) #t #f)))
-
-(module+ test
-  (check-true (all-connected? (mk-graph) (list  3 7 109 673))))
-
 (define (euler60)
   (define g (mk-graph))
-  (define candidats (reverse (graph-filter g)))
-  ; for*/first instead of for*/list : assume it's the first found  (lucky it is)
-  (for*/first  ((p (in-list candidats))
-               (lp (in-range (length p)))
-               (p1 (in-range lp))
-               (p2 (in-range (add1 p1) lp))
-               (p3 (in-range (add1 p2) lp))
-               (p4 (in-range (add1 p3) lp))
-               (p5 (in-range (add1 p4) lp))
-               #:when (< p1 p2 p3 p4 p5)
-               (perm (in-value (list (list-ref p p1)
-                                     (list-ref p p2)
-                                     (list-ref p p3)
-                                     (list-ref p p4)
-                                     (list-ref p p5))))
-               #:when (all-connected? g perm))
-    perm))
-;(apply min (map (lambda(i) (apply + i)) matches)))
+  (define ls
+    (for*/list ((cur (in-hash-values g))
+                (cur-ct (in-value (point-connected-to cur)))
+                (b (in-set cur-ct))
+                (b-ct (in-value (set-add (point-connected-to (graph-get g b)) b)))
+                (i (in-value (set-intersect b-ct (set-add cur-ct (point-value cur)))))
+                #:when (>= (set-count i) 5)
+                (c (in-set cur-ct))
+                #:when (< b c)
+                (c-ct (in-value (set-add (point-connected-to (graph-get g c)) c)))
+                (j (in-value (set-intersect c-ct i)))
+                #:when (>= (set-count j) 5)
+                (d (in-set cur-ct))
+                #:when (< c d)
+                (d-ct (in-value (set-add (point-connected-to (graph-get g d)) d)))
+                (k (in-value (set-intersect d-ct j)))
+                #:when (>= (set-count k) 5)
+                (e (in-set cur-ct))
+                #:when (< d e)
+                (e-ct (in-value (set-add (point-connected-to (graph-get g e)) e)))
+                (l (in-value (set-intersect e-ct k)))
+                #:when (= (set-count l) 5))
+      (set->list l)))
+  (apply min (map (lambda(i) (apply + i)) ls)))
+
+(time (euler60)) ; 5300ms
