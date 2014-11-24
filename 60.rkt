@@ -52,7 +52,6 @@ concatenate to produce another prime. |#
 (define (graph-del g p)
   (hash-remove g p))
 
-
 (define (graph-add g p)
   (let* ((old-p (graph-get g (point-value p)))
          (new-p (if old-p
@@ -108,4 +107,4 @@ concatenate to produce another prime. |#
       (set->list l)))
   (apply min (map (lambda(i) (apply + i)) ls)))
 
-(time (euler60)) ; 5300ms
+(time (euler60)) ; 5300ms on Intel(R) Core(TM) i5-2520M CPU @ 2.50GHz
